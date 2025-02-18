@@ -1,0 +1,82 @@
+{
+  "name": "translationMapper",
+  "displayName": "translation-mapper",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.52.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:translationMapper.findTranslation",
+    "onLanguage:handlebars"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [{
+      "command": "translationMapper.findTranslation",
+      "title": "Find Translation"
+    }],
+    "keybindings": [
+      {
+        "command": "translationMapper.findTranslation",
+        "key": "cmd+click",
+        "when": "editorLangId == handlebars"
+      }
+    ],
+    "languages": [
+      {
+          "id": "handlebars",
+          "extensions": [".hbs"]
+      }
+    ],
+    "grammars": [
+        {
+            "language": "handlebars",
+            "scopeName": "source.handlebars",
+            "path": "./syntaxes/handlebars.tmLanguage.json"
+        }
+    ],
+    "configuration": {
+      "title": "Translation Mapper Settings",
+      "properties": {
+        "translationMapper.translationFilePaths": {
+          "type": "array",
+          "description": "List of paths to translation files to search for keys.",
+          "default": [
+            "en-us.yaml",
+            "en.json"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "translationMapper.defaultLanguage": {
+          "type": "string",
+          "description": "Default language code for translation files.",
+          "default": "en-us"
+        },
+        "translationMapper.defaultTranslationFileExtension": {
+          "type": "string",
+          "description": "Default extension for translation files.",
+          "default": "yaml"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "eslint": "^9.16.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
