@@ -10,8 +10,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:translationMapper.findTranslation",
-    "onLanguage:handlebars"
+    "onLanguage:handlebars",
+    "onLanguage:typescript",
+    "onLanguage:javascript"
   ],
   "main": "./extension.js",
   "contributes": {
@@ -23,13 +24,20 @@
       {
         "command": "translationMapper.findTranslation",
         "key": "cmd+click",
-        "when": "editorLangId == handlebars"
+        "when": "editorLangId == handlebars || editorLangId == typescript || editorLangId == javascript"
       }
     ],
     "languages": [
       {
-          "id": "handlebars",
-          "extensions": [".hbs"]
+        "id": "handlebars",
+        "extensions": [".hbs"]
+      }, {
+        "id": "typescript",
+        "extensions": [".ts"]
+      },
+      {
+        "id": "javascript",
+        "extensions": [".js"]
       }
     ],
     "grammars": [

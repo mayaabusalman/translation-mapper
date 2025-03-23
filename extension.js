@@ -12,6 +12,10 @@ function getSettingsConfig() {
     };
 }
 
+function isValidKeyValueLine(line) {
+	return /^[\s-]*[a-zA-Z0-9._"'\[\]{}-]+ *:/.test(line)
+}
+
 function findTranslation(key) {
 	const settings = getSettingsConfig();
 
@@ -40,23 +44,16 @@ function findTranslation(key) {
 		if (targetLineIndex !== -1) {
 			const fileContentLines = fileContent.split('\n');
 			let linesToBeAdded = 0;
-			fileContentLines.forEach((line, index) => {
-				if (index >= targetLineIndex) {
-					return;
+
+			for (let index = 0; index < fileContentLines.length; index++) {
+				const line = fileContentLines[index];
+				if ((index >= targetLineIndex) && line.includes(keys[keys.length - 1])) {
+					break;
 				}
-				if (line.includes(' >-') || line.includes(': |') || line.includes(': "{') || line.includes(": '{")) {
-					const whitespaceCount = (line.match(/^(\s*)/)?.[1].length) || 0;
-					let nextLineCount = 1;
-					while (
-						((fileContentLines[index + nextLineCount].match(/^(\s*)/)?.[1].length || 0) > whitespaceCount)
-						|| fileContentLines[index + nextLineCount].trim() === '}"'
-						|| fileContentLines[index + nextLineCount].trim() === "}'"
-					) {
-						linesToBeAdded++;
-						nextLineCount++;
-					}
+				if (!isValidKeyValueLine(line)) {
+					linesToBeAdded++;
 				}
-			});
+			}
 
 			const translationFile = vscode.Uri.file(translationFilePath);
 			return new vscode.Location(translationFile, new vscode.Position(targetLineIndex + linesToBeAdded, 0));
@@ -100,7 +97,11 @@ function findAndMarkTranslationValue(translations, keys) {
  */
 function activate(context) {
 	const disposable = vscode.commands.registerCommand('translationMapper.findTranslation', function () {
-		vscode.languages.registerDefinitionProvider({ language: 'handlebars', scheme: 'file' }, {
+		vscode.languages.registerDefinitionProvider([
+			{ language: 'handlebars', scheme: 'file' },
+			{ language: 'typescript', scheme: 'file' },
+			{ language: 'javascript', scheme: 'file' }
+		], {
 			provideDefinition(document, position) {
 
 				const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
