@@ -1,65 +1,40 @@
-# translationMapper README
+# Translation Mapper
 
-This is the README for your extension "translationMapper".
+You know when you're reading through some template and you find a translation key that maps to some text, and then you have to search for that translation key in the app to find out what the text is?
+In my experience, I felt that this gets a bit annoying when you're dealing with multiple translations, or if you have multiple translation files, and there are many similar translation keys under different nested keys.
+I think this just piles up into minutes that you could've spent focusing on the actual logic flow instead of looking for text mappings.
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+If this rings a bell, you can thank me later:
+**Enter Translation Mapper!**
 
 ---
 
-## Working with Markdown
+## 🚀 Demo
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+![Translation Mapper](images/translation-mapper.gif)
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+---
 
-## For more information
+## ⚙️ Extension Settings
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Here are some settings you can configure to make things run smoothly:
 
-**Enjoy!**
+- `translationMapper.translationFilePaths`: Specifies the relative file path(s) where your translation file(s) are located.
+  Defaults to `en-us.yaml`.
+
+---
+
+## 🐞 Known Issues
+
+None yet — but let me know if you face any.
+
+---
+
+## 📋 Release Notes
+
+### 1.0.0
+- Initial release of Translation Mapper.
+
+---
+
+## ✨ Enjoy!
