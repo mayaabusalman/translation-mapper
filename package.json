@@ -5,7 +5,11 @@
   "publisher": "MayaAbuSalman",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.50.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mayaabusalman/translation-mapper"
   },
   "categories": [
     "Other"
@@ -17,10 +21,12 @@
   ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "translationMapper.findTranslation",
-      "title": "Find Translation"
-    }],
+    "commands": [
+      {
+        "command": "translationMapper.findTranslation",
+        "title": "Find Translation"
+      }
+    ],
     "keybindings": [
       {
         "command": "translationMapper.findTranslation",
@@ -31,22 +37,29 @@
     "languages": [
       {
         "id": "handlebars",
-        "extensions": [".hbs"]
-      }, {
+        "extensions": [
+          ".hbs"
+        ]
+      },
+      {
         "id": "typescript",
-        "extensions": [".ts"]
+        "extensions": [
+          ".ts"
+        ]
       },
       {
         "id": "javascript",
-        "extensions": [".js"]
+        "extensions": [
+          ".js"
+        ]
       }
     ],
     "grammars": [
-        {
-            "language": "handlebars",
-            "scopeName": "source.handlebars",
-            "path": "./syntaxes/handlebars.tmLanguage.json"
-        }
+      {
+        "language": "handlebars",
+        "scopeName": "source.handlebars",
+        "path": "./syntaxes/handlebars.tmLanguage.json"
+      }
     ],
     "configuration": {
       "title": "Translation Mapper Settings",
@@ -55,6 +68,11 @@
           "type": "array",
           "description": "List of paths to translation files to search for keys.",
           "default": [
+            "lib/shared/translations/en-us.yaml",
+            "lib/simon-shared/translations/en-us.yaml",
+            "lib/partner/translations/en-us.yaml",
+            "lib/quoting/translations/en-us.yaml",
+            "translations/en-us.yaml",
             "en-us.yaml",
             "en.json"
           ],
@@ -81,11 +99,11 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.96.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "eslint": "^9.16.0",
+    "@types/vscode": "^1.50.0",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.16.0"
   }
 }
