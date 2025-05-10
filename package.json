@@ -3,8 +3,8 @@
   "displayName": "Translation Mapper",
   "description": "",
   "publisher": "MayaAbuSalman",
-  "version": "0.0.2",
-  "icon": "images/icon.png",
+  "version": "1.0.0",
+  "icon": "images/translation-mapper.png",
   "files": [
     "images/",
     "README.md",
