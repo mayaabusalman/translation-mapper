@@ -1,9 +1,15 @@
 {
-  "name": "translationMapper",
-  "displayName": "translation-mapper",
+  "name": "translation-mapper",
+  "displayName": "Translation Mapper",
   "description": "",
   "publisher": "MayaAbuSalman",
   "version": "0.0.2",
+  "icon": "images/icon.png",
+  "files": [
+    "images/",
+    "README.md",
+    "extension.js"
+  ],
   "engines": {
     "vscode": "^1.50.0"
   },
@@ -52,13 +58,6 @@
         "extensions": [
           ".js"
         ]
-      }
-    ],
-    "grammars": [
-      {
-        "language": "handlebars",
-        "scopeName": "source.handlebars",
-        "path": "./syntaxes/handlebars.tmLanguage.json"
       }
     ],
     "configuration": {
