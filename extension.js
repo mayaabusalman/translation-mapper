@@ -3,39 +3,57 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-function getSettingsConfig() {
-    const config = vscode.workspace.getConfiguration('translationMapper');
-    return {
-        translationFilePaths: config.get('translationFilePaths'),
-        defaultLanguage: config.get('defaultLanguage'),
-        translationFileExtension: config.get('defaultTranslationFileExtension')
-    };
-}
+// function getSettingsConfig() {
+//     const config = vscode.workspace.getConfiguration('translationMapper');
+//     return {
+//         translationFilePaths: config.get('translationFilePaths'),
+//         defaultLanguage: config.get('defaultLanguage'),
+//         translationFileExtension: config.get('defaultTranslationFileExtension')
+//     };
+// }
 
 function isValidKeyValueLine(line) {
-	return /^[\s-]*[a-zA-Z0-9._"'\[\]{}-]+ *:/.test(line)
+	return /^[\s-]*[a-zA-Z0-9.&_"'\[\]{}-]+ *:/.test(line)
 }
 
-function findTranslation(key) {
-	const settings = getSettingsConfig();
+function findTranslationFiles(dir, pattern, found = []) {
+	const entries = fs.readdirSync(dir, { withFileTypes: true });
 
+	for (const entry of entries) {
+	  const fullPath = path.join(dir, entry.name);
+
+	  if (entry.isDirectory()) {
+		findTranslationFiles(fullPath, pattern, found);
+	  } else if (pattern.test(fullPath)) {
+		found.push(fullPath);
+	  }
+	}
+
+	return found;
+}
+
+let targetText;
+
+function findTranslation(key) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
 		return;
 	}
 
-	const translationFiles = settings.translationFilePaths;
-	const translationFileExtension = settings.translationFileExtension;
 
-	for (const translationFile of translationFiles) {
-		const basePath = workspaceFolders[0].uri.fsPath;
-		const translationFilePath = path.join(basePath, translationFile);
+	const basePath = workspaceFolders[0].uri.fsPath;
+	const regex = /[/\\]translations[/\\]en-us\.yaml$/;
+	const translationFiles = findTranslationFiles(basePath, regex);
+
+	for (const translationFilePath of translationFiles) {
 
 		if (!fs.existsSync(translationFilePath)) {
 			return;
 		}
 
 		const fileContent = fs.readFileSync(translationFilePath, 'utf8');
+		const extension = path.extname(translationFilePath);
+  		const translationFileExtension = extension.replace(/^\./, '');
 		const translations = translationFileExtension === 'yaml' ? yaml.load(fileContent) : JSON.parse(fileContent);
 
 		const keys = key.split('.');
@@ -47,7 +65,7 @@ function findTranslation(key) {
 
 			for (let index = 0; index < fileContentLines.length; index++) {
 				const line = fileContentLines[index];
-				if ((index >= targetLineIndex) && line.includes(keys[keys.length - 1])) {
+				if ((index >= targetLineIndex) && line.includes(keys[keys.length - 1]) && line.includes(targetText)) {
 					break;
 				}
 				if (!isValidKeyValueLine(line)) {
@@ -78,6 +96,7 @@ function findAndMarkTranslationValue(translations, keys) {
 	const lastKey = keys[keys.length - 1];
     for (const k of keys) {
 		if (k === lastKey && translations[k]) {
+			targetText = translations[k];
 			translations[k] = MARKED_TRANSLATION
 		}
         translations = translations[k];
@@ -103,7 +122,6 @@ function activate(context) {
 			{ language: 'javascript', scheme: 'file' }
 		], {
 			provideDefinition(document, position) {
-
 				const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
 				if (!range) return;
 
