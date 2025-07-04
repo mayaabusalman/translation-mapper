@@ -3,6 +3,12 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
+const outputChannel = vscode.window.createOutputChannel('Translation Mapper');
+
+function log(msg) {
+    outputChannel.appendLine(`[Translation Mapper] ${msg}`);
+}
+
 // function getSettingsConfig() {
 //     const config = vscode.workspace.getConfiguration('translationMapper');
 //     return {
@@ -46,7 +52,7 @@ function findTranslation(key) {
 	const translationFiles = findTranslationFiles(basePath, regex);
 
 	for (const translationFilePath of translationFiles) {
-	console.log(' findTranslation ~ translationFilePath', translationFilePath);
+		log('Found translation file: ' + translationFilePath);
 
 		if (!fs.existsSync(translationFilePath)) {
 			return;
@@ -116,6 +122,7 @@ function findAndMarkTranslationValue(translations, keys) {
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+	log('Extension activated');
 	const disposable = vscode.commands.registerCommand('translationMapper.findTranslation', function () {
 		vscode.languages.registerDefinitionProvider([
 			{ language: 'handlebars', scheme: 'file' },
