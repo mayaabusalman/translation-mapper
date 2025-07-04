@@ -46,6 +46,7 @@ function findTranslation(key) {
 	const translationFiles = findTranslationFiles(basePath, regex);
 
 	for (const translationFilePath of translationFiles) {
+	console.log(' findTranslation ~ translationFilePath', translationFilePath);
 
 		if (!fs.existsSync(translationFilePath)) {
 			return;
