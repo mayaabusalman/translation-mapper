@@ -3,7 +3,7 @@
   "displayName": "Translation Mapper",
   "description": "",
   "publisher": "MayaAbuSalman",
-  "version": "1.2.0",
+  "version": "2.0.2",
   "icon": "images/translation-mapper.png",
   "files": [
     "images/",
@@ -21,6 +21,7 @@
     "Other"
   ],
   "activationEvents": [
+    "onCommand:translationMapper.findTranslation",
     "onLanguage:handlebars",
     "onLanguage:typescript",
     "onLanguage:javascript"
