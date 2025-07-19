@@ -122,6 +122,7 @@ function findAndMarkTranslationValue(translations, keys) {
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+	outputChannel.show();
 	log('Extension activated');
 	const disposable = vscode.commands.registerCommand('translationMapper.findTranslation', function () {
 		vscode.languages.registerDefinitionProvider([
