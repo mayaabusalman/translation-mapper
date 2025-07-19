@@ -4,6 +4,8 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const outputChannel = vscode.window.createOutputChannel('Translation Mapper');
+console.log('🚀 Translation Mapper extension loaded');
+outputChannel.appendLine('🚀 Top-level log: loaded file');
 
 function log(msg) {
     outputChannel.appendLine(`[Translation Mapper] ${msg}`);
@@ -58,31 +60,35 @@ function findTranslation(key) {
 			return;
 		}
 
-		const fileContent = fs.readFileSync(translationFilePath, 'utf8');
-		const extension = path.extname(translationFilePath);
-  		const translationFileExtension = extension.replace(/^\./, '');
-		const translations = translationFileExtension === 'yaml' ? yaml.load(fileContent) : JSON.parse(fileContent);
+        try {
+            const fileContent = fs.readFileSync(translationFilePath, 'utf8');
+            const extension = path.extname(translationFilePath);
+            const translationFileExtension = extension.replace(/^\./, '');
+            const translations = translationFileExtension === 'yaml' ? yaml.load(fileContent) : JSON.parse(fileContent);
 
-		const keys = key.split('.');
-		const targetLineIndex = findLineForKey(translations, keys);
+            const keys = key.split('.');
+            const targetLineIndex = findLineForKey(translations, keys);
 
-		if (targetLineIndex !== -1) {
-			const fileContentLines = fileContent.split('\n');
-			let linesToBeAdded = 0;
+            if (targetLineIndex !== -1) {
+                const fileContentLines = fileContent.split('\n');
+                let linesToBeAdded = 0;
 
-			for (let index = 0; index < fileContentLines.length; index++) {
-				const line = fileContentLines[index];
-				if ((index >= targetLineIndex) && line.includes(keys[keys.length - 1]) && line.includes(targetText)) {
-					break;
-				}
-				if (!isValidKeyValueLine(line)) {
-					linesToBeAdded++;
-				}
-			}
+                for (let index = 0; index < fileContentLines.length; index++) {
+                    const line = fileContentLines[index];
+                    if ((index >= targetLineIndex) && line.includes(keys[keys.length - 1]) && line.includes(targetText)) {
+                        break;
+                    }
+                    if (!isValidKeyValueLine(line)) {
+                        linesToBeAdded++;
+                    }
+                }
 
-			const translationFile = vscode.Uri.file(translationFilePath);
-			return new vscode.Location(translationFile, new vscode.Position(targetLineIndex + linesToBeAdded, 0));
-		}
+                const translationFile = vscode.Uri.file(translationFilePath);
+                return new vscode.Location(translationFile, new vscode.Position(targetLineIndex + linesToBeAdded, 0));
+            }
+        } catch (e) {
+            log('error file reading translation file: ' + e.message);
+        }
 	}
 }
 
@@ -122,26 +128,51 @@ function findAndMarkTranslationValue(translations, keys) {
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	outputChannel.show();
-	log('Extension activated');
-	const disposable = vscode.commands.registerCommand('translationMapper.findTranslation', function () {
-		vscode.languages.registerDefinitionProvider([
-			{ language: 'handlebars', scheme: 'file' },
-			{ language: 'typescript', scheme: 'file' },
-			{ language: 'javascript', scheme: 'file' }
-		], {
-			provideDefinition(document, position) {
-				const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
-				if (!range) return;
+    outputChannel.show();
+    log('🔁 Starting extension activation');
 
-				const text = document.getText(range).replace(/["']/g, '');
-				return findTranslation(text);
-			}
-		});
+    try {
+        const provider = {
+            provideDefinition(document, position) {
+                const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
+                if (!range) return;
 
-	});
+                const text = document.getText(range).replace(/["']/g, '');
+                return findTranslation(text);
+            }
+        };
 
-	context.subscriptions.push(disposable);
+        vscode.languages.registerDefinitionProvider(
+            [
+                { language: 'handlebars', scheme: 'file' },
+                { language: 'typescript', scheme: 'file' },
+                { language: 'javascript', scheme: 'file' }
+            ],
+            provider
+        );
+
+        const disposable = vscode.commands.registerCommand(
+            'translationMapper.findTranslation',
+            () => {
+                log('✅ Command "findTranslation" invoked');
+                vscode.window.showInformationMessage('Translation Mapper: Command invoked');
+            }
+        );
+
+        context.subscriptions.push(disposable);
+        log('✅ Extension activated successfully');
+
+    } catch (e) {
+        const errMsg = `❌ Activation error: ${e.message}`;
+        log(errMsg);
+        vscode.window.showErrorMessage(errMsg);
+    }
+
+    return {
+        dispose() {
+            log('🛑 Extension disposed');
+        }
+    };
 }
 
 function deactivate() {}
