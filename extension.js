@@ -64,8 +64,6 @@ function findTranslation(key) {
     }
 
 	for (const translationFilePath of translationFiles) {
-		log('Search translation file: ' + translationFilePath);
-
 		if (!fs.existsSync(translationFilePath)) {
             log(`⚠️ File not found: ${translationFilePath}`);
 			continue;
@@ -125,7 +123,6 @@ function findAndMarkTranslationValue(translations, keys) {
 		}
         translations = translations[k];
         if (!translations) {
-            log('Translation not found');
 			return undefined;
 		};
 		if (k === keys[0]) {
