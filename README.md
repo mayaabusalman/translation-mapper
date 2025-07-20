@@ -18,7 +18,7 @@ If this rings a bell, install this extension and just CMD+click on a translation
 
 ## ⚙️ Extension Settings
 
-Here are some settings you can configure to make things run smoothly:
+Some settings you can configure to make things run smoothly:
 
 - `translationMapper.translationFilePaths`: Array that specifies the relative file path(s) where your translation file(s) are located.
   Defaults to `en-us.yaml`.
