@@ -135,6 +135,40 @@ function findAndMarkTranslationValue(translations, keys) {
 	return updatedObject;
 }
 
+function findTranslationValue(key) {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) return;
+
+    const basePath = workspaceFolders[0].uri.fsPath;
+    const {
+        translationFilePaths = [],
+        defaultLanguage = 'en-us',
+        translationFileExtension = 'yaml'
+    } = getSettingsConfig();
+
+    const fallbackRegex = new RegExp(`[/\\\\]translations[/\\\\]${defaultLanguage}\\.${translationFileExtension}$`);
+    const translationFiles = translationFilePaths.length > 0
+        ? translationFilePaths.map(relPath => path.join(basePath, relPath))
+        : findTranslationFiles(basePath, fallbackRegex);
+
+    for (const translationFilePath of translationFiles) {
+        try {
+            const content = fs.readFileSync(translationFilePath, 'utf8');
+            const extension = path.extname(translationFilePath);
+            const parsed = extension === '.yaml' ? yaml.load(content) : JSON.parse(content);
+
+            const value = key.split('.').reduce((o, k) => (o || {})[k], parsed);
+            if (typeof value === 'string') {
+                return value;
+            }
+        } catch (e) {
+            log(`⚠️ Error reading translation for hover: ${e.message}`);
+        }
+    }
+
+    return null;
+}
+
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -143,12 +177,14 @@ function activate(context) {
         outputChannel.show();
         log('🔁 Starting extension activation');
 
+        const definitionProviders = [
+            { language: 'handlebars', scheme: 'file' },
+            { language: 'typescript', scheme: 'file' },
+            { language: 'javascript', scheme: 'file' }
+        ];
+
         const providerDisposable = vscode.languages.registerDefinitionProvider(
-            [
-                { language: 'handlebars', scheme: 'file' },
-                { language: 'typescript', scheme: 'file' },
-                { language: 'javascript', scheme: 'file' }
-            ],
+            definitionProviders,
             {
                 provideDefinition(document, position) {
                     const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
@@ -168,6 +204,23 @@ function activate(context) {
         );
 
         context.subscriptions.push(providerDisposable, commandDisposable);
+
+        const hoverProviderDisposable = vscode.languages.registerHoverProvider(
+            definitionProviders,
+            {
+              provideHover(document, position) {
+                const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
+                if (!range) return;
+
+                const text = document.getText(range).replace(/["']/g, '');
+                const value = findTranslationValue(text);
+                if (!value) return;
+
+                return new vscode.Hover(new vscode.MarkdownString(`**Translation**: ${value}`));
+              }
+            }
+          );
+          context.subscriptions.push(hoverProviderDisposable);
 
         log('✅ Extension activated successfully');
     } catch (e) {
