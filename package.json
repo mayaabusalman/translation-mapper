@@ -3,7 +3,7 @@
   "displayName": "Translation Mapper",
   "description": "",
   "publisher": "MayaAbuSalman",
-  "version": "2.0.6",
+  "version": "2.0.8",
   "icon": "images/translation-mapper.png",
   "files": [
     "images/",
@@ -67,15 +67,7 @@
         "translationMapper.translationFilePaths": {
           "type": "array",
           "description": "List of paths to translation files to search for keys.",
-          "default": [
-            "lib/shared/translations/en-us.yaml",
-            "lib/simon-shared/translations/en-us.yaml",
-            "lib/partner/translations/en-us.yaml",
-            "lib/quoting/translations/en-us.yaml",
-            "translations/en-us.yaml",
-            "en-us.yaml",
-            "en.json"
-          ],
+          "default": [],
           "items": {
             "type": "string"
           }
@@ -105,5 +97,8 @@
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
     "eslint": "^9.16.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }

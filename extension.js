@@ -4,21 +4,19 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const outputChannel = vscode.window.createOutputChannel('Translation Mapper');
-console.log('🚀 Translation Mapper extension loaded');
-outputChannel.appendLine('🚀 Top-level log: loaded file');
 
 function log(msg) {
     outputChannel.appendLine(`[Translation Mapper] ${msg}`);
 }
 
-// function getSettingsConfig() {
-//     const config = vscode.workspace.getConfiguration('translationMapper');
-//     return {
-//         translationFilePaths: config.get('translationFilePaths'),
-//         defaultLanguage: config.get('defaultLanguage'),
-//         translationFileExtension: config.get('defaultTranslationFileExtension')
-//     };
-// }
+function getSettingsConfig() {
+    const config = vscode.workspace.getConfiguration('translationMapper');
+    return {
+        translationFilePaths: config.get('translationFilePaths'),
+        defaultLanguage: config.get('defaultLanguage'),
+        translationFileExtension: config.get('defaultTranslationFileExtension')
+    };
+}
 
 function isValidKeyValueLine(line) {
 	return /^[\s-]*[a-zA-Z0-9.&_"'\[\]{}-]+ *:/.test(line)
@@ -48,16 +46,29 @@ function findTranslation(key) {
 		return;
 	}
 
-
 	const basePath = workspaceFolders[0].uri.fsPath;
-	const regex = /[/\\]translations[/\\]en-us\.yaml$/;
-	const translationFiles = findTranslationFiles(basePath, regex);
+    const {
+        translationFilePaths = [],
+        defaultLanguage = 'en-us',
+        translationFileExtension = 'yaml'
+    } = getSettingsConfig();
+    let translationFiles = [];
+
+    if (translationFilePaths.length > 0) {
+        translationFiles = translationFilePaths.map(relPath => path.join(basePath, relPath));
+    } else {
+        const fallbackRegex = new RegExp(
+            `[\\/\\\\]translations[\\/\\\\]${defaultLanguage}\\.${translationFileExtension}$`
+        );
+        translationFiles = findTranslationFiles(basePath, fallbackRegex);
+    }
 
 	for (const translationFilePath of translationFiles) {
-		log('Found translation file: ' + translationFilePath);
+		log('Search translation file: ' + translationFilePath);
 
 		if (!fs.existsSync(translationFilePath)) {
-			return;
+            log(`⚠️ File not found: ${translationFilePath}`);
+			continue;
 		}
 
         try {
@@ -87,7 +98,7 @@ function findTranslation(key) {
                 return new vscode.Location(translationFile, new vscode.Position(targetLineIndex + linesToBeAdded, 0));
             }
         } catch (e) {
-            log('error file reading translation file: ' + e.message);
+            log('Error file reading translation file: ' + e.message);
         }
 	}
 }
@@ -114,7 +125,7 @@ function findAndMarkTranslationValue(translations, keys) {
 		}
         translations = translations[k];
         if (!translations) {
-			console.log('translation not found');
+            log('Translation not found');
 			return undefined;
 		};
 		if (k === keys[0]) {
@@ -128,52 +139,46 @@ function findAndMarkTranslationValue(translations, keys) {
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    outputChannel.show();
-    log('🔁 Starting extension activation');
-
     try {
-        const provider = {
-            provideDefinition(document, position) {
-                const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
-                if (!range) return;
+        outputChannel.show();
+        log('🔁 Starting extension activation');
 
-                const text = document.getText(range).replace(/["']/g, '');
-                return findTranslation(text);
-            }
-        };
-
-        vscode.languages.registerDefinitionProvider(
+        const providerDisposable = vscode.languages.registerDefinitionProvider(
             [
                 { language: 'handlebars', scheme: 'file' },
                 { language: 'typescript', scheme: 'file' },
                 { language: 'javascript', scheme: 'file' }
             ],
-            provider
+            {
+                provideDefinition(document, position) {
+                    const range = document.getWordRangeAtPosition(position, /(["'])(.*?)\1/);
+                    if (!range) return;
+
+                    const text = document.getText(range).replace(/["']/g, '');
+                    return findTranslation(text);
+                }
+            }
         );
 
-        const disposable = vscode.commands.registerCommand(
+        const commandDisposable = vscode.commands.registerCommand(
             'translationMapper.findTranslation',
             () => {
-                log('✅ Command "findTranslation" invoked');
                 vscode.window.showInformationMessage('Translation Mapper: Command invoked');
             }
         );
 
-        context.subscriptions.push(disposable);
+        context.subscriptions.push(providerDisposable, commandDisposable);
+
         log('✅ Extension activated successfully');
-
     } catch (e) {
-        const errMsg = `❌ Activation error: ${e.message}`;
-        log(errMsg);
-        vscode.window.showErrorMessage(errMsg);
+        log(`❌ Activation crashed: ${e.message}`);
+        vscode.window.showErrorMessage(`Translation Mapper activation failed: ${e.message}`);
     }
-
     return {
-        dispose() {
-            log('🛑 Extension disposed');
-        }
+        deactivate
     };
 }
+
 
 function deactivate() {}
 
